@@ -9,7 +9,7 @@ import torch
 from torch import nn
 import numpy as np
 
-from dvs_dataset import DvsDataset
+from utility.dvs_dataset import DvsDataset
 import matplotlib.pyplot as plt
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

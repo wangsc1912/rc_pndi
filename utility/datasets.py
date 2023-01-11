@@ -26,7 +26,6 @@ class SimpleDataset(torch.utils.data.Dataset):
             self.image_proc = False
 
         self.get_ori_img = ori_img
-        # self.choose_func = choose_func
 
         if type(path) is str:
             self.data, self.targets = torch.load(path)
@@ -34,13 +33,10 @@ class SimpleDataset(torch.utils.data.Dataset):
             self.data, self.targets = path[0], path[1]
         else:
             print('wrong path type')
-        # except:
-        #     self.data, self.label = path['']
         self.ori_img = self.data
 
         if crop and self.image_proc:
             self.data = self.data[:, 4: 26, 5: 25]
-            # self.data = self.data[:, 5: 25, 5: 25]
         if sampling != 0 and self.image_proc:
             self.data = self.data.unsqueeze(dim=1)
             self.data = F.interpolate(self.data, size=(sampling, sampling))
@@ -52,17 +48,10 @@ class SimpleDataset(torch.utils.data.Dataset):
             plt.savefig('downsampled_img')
 
         num_data = self.data.shape[0]
-        # self.data = img_h
         if type(path) is str and self.image_proc:
             self.bin_data = binarize_dataset(self.data, threshold=0.25)
 
             self.img_h, self.img_w = self.data.shape[1], self.data.shape[2]
-            # self.ori_img = self.data
-
-            # if num_pixel % num_pulse == 0:
-            #     self.data = self.data.view((num_data, num_pulse, -1))
-            # else:
-            #     self.data = self.data
             self.reshaped_data = reshape(self.bin_data, num_pulse)
             self.reshaped_data = torch.transpose(self.reshaped_data, dim0=1, dim1=2)
             self.data = self.reshaped_data
@@ -74,9 +63,7 @@ class SimpleDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index: int):
 
-        # label = self.label_dict[img_name]
         target = self.targets[index]
-
         img = self.reshaped_data[index]
 
         # Normalize
@@ -129,7 +116,6 @@ class SimpleDataset(torch.utils.data.Dataset):
         save original images for each class.
         '''
         sample_dict = {}
-        # for cls in self.num_class:
         for img, target in zip(self.ori_img, self.targets):
             target = target.item()
             if target not in sample_dict.keys():
@@ -157,10 +143,8 @@ class MnistDataset(MNIST, SimpleDataset):
         self.ori_img = self.data
 
         if crop:
-            # self.data = self.data[:, 5: 25, 5: 25]
             self.data = self.data[:, 4: 26, 5: 25]
         if sampling != 0:
-            # self.data = self.data.ups
             self.data = F.interpolate(self.data, size=(sampling, sampling))
 
         self.img_h, self.img_w = self.data.shape[1], self.data.shape[2]
@@ -177,8 +161,6 @@ class MnistDataset(MNIST, SimpleDataset):
 
     def __getitem__(self, index: int):
         target = self.targets[index]
-        # if self.split == 'letters':
-        #     target = target - 1
         img = self.reshaped_data[index]
 
         # Normalize
@@ -224,9 +206,6 @@ class EmnistDataset(EMNIST, SimpleDataset):
             target_less_cls = torch.tensor(list_target_less_cls)
             self.data = data_less_cls
             self.targets = target_less_cls
-            # remap the target numbers
-            # for t in crop_class:
-                # self.targets = torch.where(self.targets > t, self.targets - 1, self.targets)
             crop_class_temp = copy.deepcopy(crop_class)
             while crop_class_temp:
                 t = crop_class_temp.pop()
@@ -234,13 +213,11 @@ class EmnistDataset(EMNIST, SimpleDataset):
 
         if self.transform:
             self.data = self.transform(self.data)
-        # self.data, self.targets = k
         self.ori_img = self.data
 
         if crop:
             self.data = self.data[:, 5: 25, 5: 25]
         if sampling != 0:
-            # self.data = self.data.ups
             self.data = F.interpolate(self.data, size=(sampling, sampling))
 
         num_data = self.data.shape[0]
@@ -252,8 +229,6 @@ class EmnistDataset(EMNIST, SimpleDataset):
         self.reshaped_data = reshape(self.bin_data, num_pulse)
         self.reshaped_data = torch.transpose(self.reshaped_data, dim0=1, dim1=2)
 
-        # if transform is not None:
-        #     self.transform = transform
         if mode == 'real':
             self.reshaped_data = torch.squeeze(self.reshaped_data.reshape(num_data, -1)).to(torch.float)
 
@@ -278,12 +253,6 @@ class EmnistDataset(EMNIST, SimpleDataset):
     def class_set(self):
         return set(self.targets.tolist())
 
-    # def visualize_classes(self, save_dir_path, format='pdf'):
-    #     return super().visualize_classes(save_dir_path, format)
-
-    # def visualize_sample(self, save_dir_path, idx=0, cls=0, grid=False):
-    #     return super().visualize_sample(save_dir_path, idx, cls, grid)
-
 
 class FmnistDataset(FashionMNIST, SimpleDataset):
     def __init__(self,
@@ -299,7 +268,6 @@ class FmnistDataset(FashionMNIST, SimpleDataset):
         super(FmnistDataset, self).__init__(root, **kwargs)
 
         self.get_ori_img = ori_img
-        # self.data, self.targets = k
         self.ori_img = self.data
 
         if crop_class:
@@ -313,9 +281,6 @@ class FmnistDataset(FashionMNIST, SimpleDataset):
             target_less_cls = torch.tensor(list_target_less_cls)
             self.data = data_less_cls
             self.targets = target_less_cls
-            # remap the target numbers
-            # for t in crop_class:
-                # self.targets = torch.where(self.targets > t, self.targets - 1, self.targets)
             while crop_class:
                 t = crop_class.pop()
                 self.targets = torch.where(self.targets > t, self.targets - 1, self.targets)
@@ -384,20 +349,13 @@ class FashionWithSize(FashionMNIST, SimpleDataset):
             target_less_cls = torch.tensor(list_target_less_cls)
             self.data = data_less_cls
             self.targets = target_less_cls
-            # remap the target numbers
-            # for t in crop_class:
-                # self.targets = torch.where(self.targets > t, self.targets - 1, self.targets)
             while crop_class:
                 t = crop_class.pop()
                 self.targets = torch.where(self.targets > t, self.targets - 1, self.targets)
 
         if crop:
-            #TODO: how should we crop the image for fmnist?
-
-            # self.data = self.data[:, 5: 25, 5: 25]
             self.data = self.data[:, 4: 26, 5: 25]
         if sampling != 0:
-            # self.data = self.data.ups
             self.data = F.interpolate(self.data, size=(sampling, sampling))
 
         num_data = self.data.shape[0]
@@ -409,23 +367,16 @@ class FashionWithSize(FashionMNIST, SimpleDataset):
         self.reshaped_data = reshape(self.bin_data, num_pulse)
         self.reshaped_data = torch.transpose(self.reshaped_data, dim0=1, dim1=2)
 
-        # if transform is not None:
-        #     self.transform = transform
-
     def __getitem__(self, index: int):
         target = self.targets[index]
         img = self.reshaped_data[index]
         if target in [0, 1, 2, 5]:
             target2 = np.random.randint(0,3)
             img2 = self.letters[target2]
-            # transpose the image 
-            # img2 = img2.T
             target2 = target2 + 10
         elif target in [3, 4, 6]:
             target2 = np.random.randint(0, 10)
             img2 = self.digits[target2].T
-            # transpose the image
-            # img2 = img2.T
         
         if self.get_ori_img:
             return img, img2, self.ori_img[index], target, target2
@@ -445,14 +396,9 @@ class FashionWithMnist(torch.utils.data.Dataset):
             digit = torch.load(roots_dict['MNIST'])
             letter = torch.load(roots_dict['EMNIST'])
         else:
-            if not soft:
-                fashion = torch.load('data/huang_FMNIST_5cls_oldtarget_0211_te.pt')
-                digit = torch.load('data/huang_MNIST_10251557_te.pt')
-                letter = torch.load('data/huang_EMNIST_letters_02102137_te.pt')
-            else:
-                fashion = torch.load('data/huang_FMNIST_letters_05082209_te.pt')
-                digit = torch.load('data/huang_MNIST_letters_05082157_te.pt')
-                letter = torch.load('data/huang_EMNIST_letters_05082209_te.pt')
+            fashion = torch.load('data/huang_FMNIST_5cls_oldtarget_0211_te.pt')
+            digit = torch.load('data/huang_MNIST_10251557_te.pt')
+            letter = torch.load('data/huang_EMNIST_letters_02102137_te.pt')
 
         self.data = fashion[0]
         self.targets = fashion[1]
@@ -475,67 +421,6 @@ class FashionWithMnist(torch.utils.data.Dataset):
         l_idx = np.random.randint(0, self.ldata_len)
         ltarget = self.ltargets[l_idx]
         ldata = self.ldata[l_idx]
-
-        return data, ddata, ldata, target, dtarget, ltarget
-
-    def __len__(self):
-        return len(self.targets)
-
-
-class SizeDataset(torch.utils.data.Dataset):
-    def __init__(self) -> None:
-        super(SizeDataset, self).__init__()
-        digit_letter = np.load(open('data_generate/digit_letter.npz', 'rb'))
-        self.digits = digit_letter['digits']
-        self.letters = digit_letter['letters']
-        #TODO: check this
-        self.digits_letters_raw = np.concatenate((self.digits, self.letters))
-        self.digits_letters = np.repeat(self.digits_letters_raw, 1000, axis=0)
-        self.targets = np.repeat(list(range(13)), 1000)
-
-    def __getitem__(self, index: int):
-        return self.digits_letters[index].T, self.targets[index]
-
-    def __len__(self) -> int:
-        return len(self.digits_letters)
-
-    def get_new_width(self):
-        return self.digits_letters.shape[-1]
-
-
-class FashionSizeMaterial(torch.utils.data.Dataset):
-    def __init__(self, root):
-        super(FashionWithMnist, self).__init__()
-        fashion = torch.load('fmnist_5cls.pt')
-        digit = torch.load('mnist.pt')
-        letter = torch.load('emnist_11cls.pt')
-
-        self.data = fashion['reshaped_data']
-        self.targets = fashion['target']
-        self.ori_img = fashion['data']
-
-        self.digit_data = digit['reshaped_data']
-        self.digit_targets = digit['target']
-        self.ori_digit_img = digit['data']
-
-        self.letter_data = letter['reshaped_data']
-        self.letter_targets = letter['target']
-        self.ori_letter_img = letter['data']
-
-        self.ddata_len = self.digit_targets.shape[0]
-        self.ldata_len = self.letter_targets.shape[0]
-        self.data_len = self.targets.shape[0]
-
-    def __getitem__(self, index:int):
-        target = self.targets[index]
-        data = self.data[index]
-
-        d_idx = np.random.randint(0, self.ddata_len)
-        dtarget = self.digit_targets[d_idx]
-        ddata = self.digit_data[d_idx]
-        l_idx = np.random.randint(0, self.ldata_len)
-        ltarget = self.letter_targets[l_idx]
-        ldata = self.letter_data[l_idx]
 
         return data, ddata, ldata, target, dtarget, ltarget
 

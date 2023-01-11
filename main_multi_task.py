@@ -2,15 +2,14 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
-import torch.nn.functional as F
 import time
 import os
 import time
 from datetime import datetime
 import utility.utils as utils
-import datasets
+import utility.datasets as datasets
 import numpy as np
-import train_funcs
+import utility.train_funcs as train_funcs
 from ann import ann_model
 
 # parse the args
