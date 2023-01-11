@@ -1,0 +1,13 @@
+*.png
+zhang*
+demo_images/*
+*.pt
+dataset/*
+results/*
+*.jpg
+*.png
+*.pdf
+*.zip
+*.npz
+*.npy
+log/*
